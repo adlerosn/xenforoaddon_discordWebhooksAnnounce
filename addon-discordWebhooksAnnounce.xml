@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<addon addon_id="discordWebhooksAnnounce" title="[kiror][Discord] Webhooks Announcer" version_string="0.1" version_id="1" url="https://github.com/adlerosn/" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+  <admin_navigation/>
+  <admin_permissions/>
+  <admin_style_properties/>
+  <admin_templates>
+    <template title="kiror_option_template_discord_wh_forum_nodes_bc"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<ul>
+			<li>
+<div style="height: 200px; overflow-y: scroll; background-color:{xen:property pageBackground};">
+<xen:foreach loop="$forums" value="$forum">
+<input  type="checkbox"
+	name="{$fieldPrefix}[{$preparedOption.option_id}][{$forum.id}]"
+	{xen:if '{$forum.ck}', 'checked'}
+	{xen:if '{$forum.nf}', 'disabled'}>
+{xen:if '{$forum.nf}', '<i>'}
+{xen:string repeat, '&nbsp;&nbsp;&nbsp;&nbsp;', $forum.dp}{$forum.nm}
+{xen:if '{$forum.nf}', '</i>'}
+</input>
+<br />
+</xen:foreach>
+</div>
+			</li>
+		</ul>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+    <template title="kiror_option_template_discord_wh_forum_nodes_each"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<ul>
+			<li>
+<div style="height: 200px; overflow-y: scroll; background-color:{xen:property pageBackground};">
+<xen:textbox name="" value="Forum name" placeholder="Forum name" size="20" readonly="1" />
+<xen:textbox name="" value="Webhook URL" placeholder="Webhook URL" size="50" readonly="1" />
+<br />
+<xen:foreach loop="$forums" value="$forum">
+<xen:textbox name="" value="{xen:string repeat, '&nbsp;&nbsp;&nbsp;&nbsp;', $forum.dp}{$forum.nm}" size="20" readonly="1" />
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$forum.id}]" value="{$forum.wh}" placeholder="{$forum.ph}" size="50" readonly="{$forum.nf}" />
+<br />
+</xen:foreach>
+</div>
+			</li>
+		</ul>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+    <template title="kiror_option_template_discord_wh_siropuchat"><![CDATA[<xen:controlunit label="{$preparedOption.title}" hint="{$preparedOption.hint}">
+	<xen:explain>{xen:raw $preparedOption.explain}</xen:explain>
+	<xen:html>
+		<ul>
+			<li>
+<xen:if is="{$siropuChatInstalledAndActive}">
+<div style="height: 200px; overflow-y: scroll; background-color:{xen:property pageBackground};">
+<xen:textbox name="" value="Room name" placeholder="Room name" size="20" readonly="1" />
+<xen:textbox name="" value="Webhook URL" placeholder="Webhook URL" size="50" readonly="1" />
+<xen:foreach loop="$rooms" value="$room">
+<xen:textbox name="" value="{$room.nm}" placeholder="{xen:phrase word_or_phrase}" size="20" readonly="1" />
+<xen:textbox name="{$fieldPrefix}[{$preparedOption.option_id}][{$room.id}]" value="{$room.wh}" placeholder="Webhook URL" size="50" />
+<br />
+</xen:foreach>
+</div>
+<xen:else />
+<span class="muted"><a href="https://xenforo.com/community/resources/chat-by-siropu.4309/">Chat by Siropu</a> add-on is not installed and active</span>.
+</xen:if>
+			</li>
+		</ul>
+		
+		<input type="hidden" name="{$listedFieldName}" value="{$preparedOption.option_id}" />
+		{xen:raw $editLink}
+	</xen:html>
+</xen:controlunit>]]></template>
+  </admin_templates>
+  <admin_template_modifications/>
+  <code_events/>
+  <code_event_listeners>
+    <listener event_id="load_class" execute_order="10" callback_class="discordWebhooksAnnounce_ExtendClassListener" callback_method="callback" active="1" hint="" description="Extends datawriters to sent events to Discord webhooks"/>
+  </code_event_listeners>
+  <cron/>
+  <email_templates/>
+  <email_template_modifications/>
+  <optiongroups>
+    <group group_id="kirorDiscordWebhooks" display_order="1" debug_only="0"/>
+    <option option_id="discordWebhookAnnounceMemberBan" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="204"/>
+    </option>
+    <option option_id="discordWebhookErrorToLog" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="75"/>
+    </option>
+    <option option_id="discordWebhookForumToWebhook" edit_format="callback" data_type="array" can_backup="1" validation_class="discordWebhooksAnnounce_adminOptionForumNodesToWebhook" validation_method="validate">
+      <default_value>a:0:{}</default_value>
+      <edit_format_params>discordWebhooksAnnounce_adminOptionForumNodesToWebhook::renderView</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="7"/>
+    </option>
+    <option option_id="discordWebhookMaxRetry" edit_format="spinbox" data_type="positive_integer" can_backup="1">
+      <default_value>5</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="72"/>
+    </option>
+    <option option_id="discordWebhookRetryCooldown" edit_format="spinbox" data_type="positive_integer" can_backup="1">
+      <default_value>10</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="73"/>
+    </option>
+    <option option_id="discordWebhookSiropuChatAnnouncer" edit_format="callback" data_type="array" can_backup="1" validation_class="discordWebhooksAnnounce_adminOptionChatToWebhook" validation_method="validate">
+      <default_value>a:0:{}</default_value>
+      <edit_format_params>discordWebhooksAnnounce_adminOptionChatToWebhook::renderView</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="8"/>
+    </option>
+    <option option_id="discordWebhookSubprocess" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>0</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="70"/>
+    </option>
+    <option option_id="discordWebhookTimeout" edit_format="spinbox" data_type="positive_integer" can_backup="1">
+      <default_value>5</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="77"/>
+    </option>
+    <option option_id="discordWebhookUrlAdmin" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="3"/>
+    </option>
+    <option option_id="discordWebhookUrlLogo" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="5"/>
+    </option>
+    <option option_id="discordWebhookUrlMember" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="1"/>
+    </option>
+    <option option_id="discordWebhookUrlModerator" edit_format="textbox" data_type="string" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="2"/>
+    </option>
+    <option option_id="discordWebhookVisibleForums" edit_format="callback" data_type="array" can_backup="1" validation_class="discordWebhooksAnnounce_adminOptionForumNodes" validation_method="validate">
+      <default_value>a:0:{}</default_value>
+      <edit_format_params>discordWebhooksAnnounce_adminOptionForumNodes::renderView</edit_format_params>
+      <sub_options>*</sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="6"/>
+    </option>
+    <option option_id="discordWebhook_newarticle" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="160"/>
+    </option>
+    <option option_id="discordWebhook_newblogentry" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="150"/>
+    </option>
+    <option option_id="discordWebhook_newchatban" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="201"/>
+    </option>
+    <option option_id="discordWebhook_newmedia" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="170"/>
+    </option>
+    <option option_id="discordWebhook_newregistrations" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="110"/>
+    </option>
+    <option option_id="discordWebhook_newregistrations_dob" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="120"/>
+    </option>
+    <option option_id="discordWebhook_newreport" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="202"/>
+    </option>
+    <option option_id="discordWebhook_newthreadreply" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="140"/>
+    </option>
+    <option option_id="discordWebhook_newthreads" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value>1</default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="130"/>
+    </option>
+    <option option_id="discordWebhook_newuserawaitingapproval" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="301"/>
+    </option>
+    <option option_id="discordWebhook_newwarning" edit_format="onoff" data_type="boolean" can_backup="1">
+      <default_value></default_value>
+      <edit_format_params></edit_format_params>
+      <sub_options></sub_options>
+      <relation group_id="kirorDiscordWebhooks" display_order="203"/>
+    </option>
+  </optiongroups>
+  <permissions>
+    <permission_groups/>
+    <permissions/>
+    <interface_groups/>
+  </permissions>
+  <phrases>
+    <phrase title="option_discordWebhookAnnounceMemberBan" version_id="0" version_string="0.0"><![CDATA[Announce ban/unban]]></phrase>
+    <phrase title="option_discordWebhookAnnounceMemberBan_explain" version_id="0" version_string="0.0"><![CDATA[Visible by moderators]]></phrase>
+    <phrase title="option_discordWebhookErrorToLog" version_id="0" version_string="0.0"><![CDATA[Error logging]]></phrase>
+    <phrase title="option_discordWebhookErrorToLog_explain" version_id="0" version_string="0.0"><![CDATA[HTTP errors will go to log?]]></phrase>
+    <phrase title="option_discordWebhookForumToWebhook" version_id="0" version_string="0.0"><![CDATA[Unicast news from forums]]></phrase>
+    <phrase title="option_discordWebhookForumToWebhook_explain" version_id="0" version_string="0.0"><![CDATA[Where each forum (already broadcasted or not) will send notification messages about new threads and replies.]]></phrase>
+    <phrase title="option_discordWebhookMaxRetry" version_id="0" version_string="0.0"><![CDATA[Max retry]]></phrase>
+    <phrase title="option_discordWebhookMaxRetry_explain" version_id="0" version_string="0.0"><![CDATA[If launched in background, will retry up to this limit.]]></phrase>
+    <phrase title="option_discordWebhookRetryCooldown" version_id="0" version_string="0.0"><![CDATA[Retry cooldown]]></phrase>
+    <phrase title="option_discordWebhookRetryCooldown_explain" version_id="0" version_string="0.0"><![CDATA[If launched in background, between the retries, this cooldown will be applied.]]></phrase>
+    <phrase title="option_discordWebhookSiropuChatAnnouncer" version_id="0" version_string="0.0"><![CDATA[Room to Webhook mapping]]></phrase>
+    <phrase title="option_discordWebhookSiropuChatAnnouncer_explain" version_id="0" version_string="0.0"><![CDATA[The mapping from <a href="https://xenforo.com/community/resources/chat-by-siropu.4309/">Siropu's Chat</a> (paid add-on) to the webhook. Unidirectional, outgoing from the site.]]></phrase>
+    <phrase title="option_discordWebhookSubprocess" version_id="0" version_string="0.0"><![CDATA[Launch as subprocess]]></phrase>
+    <phrase title="option_discordWebhookSubprocess_explain" version_id="0" version_string="0.0"><![CDATA[Unchecked: Sending the message will delay the page response for the user.<br />
+Checked: A sub-process will be launched, the user's response won't delay.]]></phrase>
+    <phrase title="option_discordWebhookTimeout" version_id="0" version_string="0.0"><![CDATA[Connection timeout]]></phrase>
+    <phrase title="option_discordWebhookTimeout_explain" version_id="0" version_string="0.0"><![CDATA[Time to wait for response.<br />
+The developer of this add-on suggests setting this value to 5.]]></phrase>
+    <phrase title="option_discordWebhookUrlAdmin" version_id="0" version_string="0.0"><![CDATA[Webhook URL for administrators room]]></phrase>
+    <phrase title="option_discordWebhookUrlAdmin_explain" version_id="0" version_string="0.0"><![CDATA[]]></phrase>
+    <phrase title="option_discordWebhookUrlLogo" version_id="0" version_string="0.0"><![CDATA[Website logo]]></phrase>
+    <phrase title="option_discordWebhookUrlLogo_explain" version_id="0" version_string="0.0"><![CDATA[Image that will be used as "bot's" logo.]]></phrase>
+    <phrase title="option_discordWebhookUrlMember" version_id="0" version_string="0.0"><![CDATA[Webhook URL for members room]]></phrase>
+    <phrase title="option_discordWebhookUrlMember_explain" version_id="0" version_string="0.0"><![CDATA[]]></phrase>
+    <phrase title="option_discordWebhookUrlModerator" version_id="0" version_string="0.0"><![CDATA[Webhook URL for moderators room]]></phrase>
+    <phrase title="option_discordWebhookUrlModerator_explain" version_id="0" version_string="0.0"><![CDATA[]]></phrase>
+    <phrase title="option_discordWebhookVisibleForums" version_id="0" version_string="0.0"><![CDATA[Broadcast news from forums]]></phrase>
+    <phrase title="option_discordWebhookVisibleForums_explain" version_id="0" version_string="0.0"><![CDATA[Forums that members will receive messages about new posts and replies on members room.]]></phrase>
+    <phrase title="option_discordWebhook_newarticle" version_id="0" version_string="0.0"><![CDATA[Announce New Articles]]></phrase>
+    <phrase title="option_discordWebhook_newarticle_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members<br>
+Depends on another (paid) add-on: <a href="https://xenaddons.com/store-products/article-management-system/">Article Management System</a>.]]></phrase>
+    <phrase title="option_discordWebhook_newblogentry" version_id="0" version_string="0.0"><![CDATA[Announce New Blog Entry]]></phrase>
+    <phrase title="option_discordWebhook_newblogentry_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members<br>
+Depends on another (free) add-on: <a href="https://xenforo.com/community/resources/good-enough-blogs.5081/">Good Enough Blogs</a>.]]></phrase>
+    <phrase title="option_discordWebhook_newchatban" version_id="0" version_string="0.0"><![CDATA[Announce New Chat Ban]]></phrase>
+    <phrase title="option_discordWebhook_newchatban_explain" version_id="0" version_string="0.0"><![CDATA[Visible by moderators<br>
+Depends on another (paid) add-on: <a href="https://xenforo.com/community/resources/chat-by-siropu.4309/">Chat by Siropu</a>.]]></phrase>
+    <phrase title="option_discordWebhook_newmedia" version_id="0" version_string="0.0"><![CDATA[Announce New Media on Gallery]]></phrase>
+    <phrase title="option_discordWebhook_newmedia_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members<br>
+Depends on another (paid) add-on: <a href="https://xenforo.com/purchase/">XenForo Media Gallery</a>.]]></phrase>
+    <phrase title="option_discordWebhook_newregistrations" version_id="0" version_string="0.0"><![CDATA[Announce New Members]]></phrase>
+    <phrase title="option_discordWebhook_newregistrations_dob" version_id="0" version_string="0.0"><![CDATA[Announce New Members' Birthday and Age]]></phrase>
+    <phrase title="option_discordWebhook_newregistrations_dob_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members]]></phrase>
+    <phrase title="option_discordWebhook_newregistrations_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members]]></phrase>
+    <phrase title="option_discordWebhook_newreport" version_id="0" version_string="0.0"><![CDATA[Announce New Report]]></phrase>
+    <phrase title="option_discordWebhook_newreport_explain" version_id="0" version_string="0.0"><![CDATA[Visible by moderators]]></phrase>
+    <phrase title="option_discordWebhook_newthreadreply" version_id="0" version_string="0.0"><![CDATA[Announce New Thread Replies]]></phrase>
+    <phrase title="option_discordWebhook_newthreadreply_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members]]></phrase>
+    <phrase title="option_discordWebhook_newthreads" version_id="0" version_string="0.0"><![CDATA[Announce New Threads]]></phrase>
+    <phrase title="option_discordWebhook_newthreads_explain" version_id="0" version_string="0.0"><![CDATA[Visible by members]]></phrase>
+    <phrase title="option_discordWebhook_newuserawaitingapproval" version_id="0" version_string="0.0"><![CDATA[Announce New Member Awaiting Approval]]></phrase>
+    <phrase title="option_discordWebhook_newuserawaitingapproval_explain" version_id="0" version_string="0.0"><![CDATA[Visible by administrators]]></phrase>
+    <phrase title="option_discordWebhook_newwarning" version_id="0" version_string="0.0"><![CDATA[Announce New Warning]]></phrase>
+    <phrase title="option_discordWebhook_newwarning_explain" version_id="0" version_string="0.0"><![CDATA[Visible by moderators]]></phrase>
+    <phrase title="option_group_kirorDiscordWebhooks" version_id="0" version_string="0.0"><![CDATA[[kiror] Discord Webhooks]]></phrase>
+    <phrase title="option_group_kirorDiscordWebhooks_description" version_id="0" version_string="0.0"><![CDATA[Send site activity to Discord via Webhooks]]></phrase>
+  </phrases>
+  <route_prefixes/>
+  <style_properties/>
+  <templates/>
+  <public_template_modifications/>
+  <bb_code_media_sites/>
+  <bb_codes/>
+</addon>
